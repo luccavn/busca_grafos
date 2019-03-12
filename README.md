@@ -1,2 +1,2 @@
 # busca_grafos
-Trabalho de Grafos - Algoritmos de Busca.
+Algoritmos de busca aplicados em grafos.
