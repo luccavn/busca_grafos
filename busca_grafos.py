@@ -6,7 +6,9 @@ from heapq import *
 from pygame.locals import *
 from math import ceil, sqrt
 
-# Constantes:
+##############
+# Constantes #
+##############
 
 COLOR_BLACK = (0,0,0)       # Valores RGB da cor preta.
 COLOR_WHITE = (255,255,255) # Valores RGB da cor branca.
@@ -14,6 +16,10 @@ SCREEN_SIZE = (800, 600)    # Dimensões da janela.
 FONT_SIZE = 11              # Tamanho da fonte.
 DOT_RADIUS = 4              # Raio dos pontos do mapa.
 LINE_WIDTH = 2              # Espessura das linhas de rota.
+
+#################
+# Inicialização #
+#################
 
 root_dir = path.dirname(path.abspath(__file__)) # Diretório raiz do projeto.
 map_path = path.join(root_dir, 'mapa_vale.png') # Diretório da imagem do mapa.
@@ -23,13 +29,18 @@ pygame.display.set_caption('Algoritmos de Busca em Grafo - Vale do Paraíba')   
 
 screen = pygame.display.set_mode(SCREEN_SIZE)    # Altera as dimensões da janela.
 
-sys_font = pygame.font.SysFont('Comic Sans MS', FONT_SIZE) # Carrega uma fonte específica do sistema para uso.
-title_font = pygame.font.SysFont('Comic Sans MS', FONT_SIZE+10) # Carrega uma fonte específica do sistema para uso.
+# Carrega fontes específicas do sistema para uso na interface do usuário.
+sys_font = pygame.font.SysFont('Comic Sans MS', FONT_SIZE)
+title_font = pygame.font.SysFont('Comic Sans MS', FONT_SIZE+10)
 medium_font = pygame.font.SysFont('Comic Sans MS', FONT_SIZE+2)
 
-# Carrega a imagem do mapa.
+# Carrega a imagem do mapa para uso na interface do usuário.
 map_image = pygame.image.load(map_path)
 map_image_scaled = pygame.transform.scale(map_image, SCREEN_SIZE)
+
+###########
+# Classes #
+###########
 
 class Vertex:
     """ Representa um vértice do grafo 
@@ -90,6 +101,10 @@ class County():
     def rect(self):
         return self._rect
 
+###########
+# Métodos #
+###########
+
 def already_exists(name, lst):
     """Retorna um vértice já existente em uma lista.
     
@@ -113,6 +128,10 @@ def get_county_byname(counties, name):
         if county.name == name:
             return county
     return None
+
+####################
+# Métodos de Busca #
+####################
 
 def dijkstra(edges, f, t):
     """Algoritmo de Dijkstra
@@ -141,7 +160,10 @@ def dijkstra(edges, f, t):
                     heappush(q, (next, v2, path))
     return float("inf")
 
-# Função main.
+###############
+# Função main #
+###############
+
 if __name__ == "__main__":
 
     # Faz a leitura dos dados contidos no arquivo dist_vale.csv e cria uma tabela.
