@@ -169,6 +169,7 @@ if __name__ == "__main__":
     # Faz a leitura dos dados contidos no arquivo dist_vale.csv e cria uma tabela.
     data = pd.read_csv(path.join(root_dir, 'dist_vale.csv'), sep=',', encoding='utf-8')
     data_matrix = data.values    # Transforma os valores da tabela em uma matriz.
+    del data
 
     # Varre a matriz e cria uma lista de Vértices.
     vertexes = list()
@@ -197,11 +198,12 @@ if __name__ == "__main__":
             edges.append(new_edge)
 
     # Faz a leitura das posições dos pontos no mapa, contidos no arquivo map_dots.csv
-    map_data = pd.read_csv(path.join(root_dir, 'map_dots.csv'), sep=',', encoding='utf-8')
-    map_values = map_data.values    # Transforma os dados em uma matriz.
+    data = pd.read_csv(path.join(root_dir, 'map_dots.csv'), sep=',', encoding='utf-8')
+    data_matrix = data.values    # Transforma os dados em uma matriz.
+    del data
 
-    # Cria os MapDots que representam os pontos no mapa.
-    map_counties = [County(map_values[i][0], (map_values[i][1], map_values[i][2])) for i in range(len(map_values))]
+    # Cria os municípios que serão desenhados em cima do mapa.
+    map_counties = [County(data[0], (data[1], data[2])) for data in data_matrix]
     county_count = len(map_counties)
 
     route_path = None   # Variável do município atual.
@@ -252,6 +254,5 @@ if __name__ == "__main__":
                 pygame.draw.line(screen, COLOR_BLACK, get_county_byname(map_counties, route_path[i]).pos, get_county_byname(map_counties, route_path[i+1]).pos, LINE_WIDTH)
                 title_text = title_font.render('Rota: {} até {}, Distância: aprox. {} km.'.format(from_county, to_county, ceil(route_dist)), True, COLOR_BLACK)
                 screen.blit(title_text, (SCREEN_SIZE[0]/4 - 70, 0))
-
 
         pygame.display.flip()   # Atualiza a janela do programa.
