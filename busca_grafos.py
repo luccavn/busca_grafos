@@ -146,24 +146,24 @@ if __name__ == "__main__":
 
     # Faz a leitura dos dados contidos no arquivo dist_vale.csv e cria uma tabela.
     data = pd.read_csv(path.join(root_dir, 'dist_vale.csv'), sep=',', encoding='utf-8')
-    values = data.values    # Transforma os valores da tabela em uma matriz.
+    data_matrix = data.values    # Transforma os valores da tabela em uma matriz.
 
     # Varre a matriz e cria uma lista de Vértices.
     vertexes = list()
-    for i in range(len(values)):
-        current_county = values[i][0]
-        current_node = already_exists(current_county, vertexes)
-        if current_node:
+    for data in data_matrix:
+        current_county = data[0]
+        current_vertex = already_exists(current_county, vertexes)
+        if current_vertex:    # Se um vértice com este identificador já existir:
             new_neighbour = Vertex()
-            new_neighbour.name = values[i][1]
-            new_neighbour.distance = values[i][2]
-            current_node.add_neighbour(new_neighbour)
+            new_neighbour.name = data[1]
+            new_neighbour.distance = data[2]
+            current_vertex.add_neighbour(new_neighbour)
         else:
             new_vertex = Vertex()
             new_neighbour = Vertex()
-            new_vertex.name = values[i][0]
-            new_neighbour.name = values[i][1]
-            new_neighbour.distance = values[i][2]
+            new_vertex.name = data[0]
+            new_neighbour.name = data[1]
+            new_neighbour.distance = data[2]
             new_vertex.add_neighbour(new_neighbour)
             vertexes.append(new_vertex)
 
