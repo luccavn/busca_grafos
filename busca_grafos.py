@@ -117,7 +117,11 @@ def get_county_byname(counties, name):
 def dijkstra(edges, f, t):
     """Algoritmo de Dijkstra
 
-    Encontra a rota mais curta entre dois municípios."""
+    Encontra a rota mais curta entre dois municípios.
+    
+    - edges : Arestas do grafo.
+    - f : Vértice de origem ou inicial.
+    - t : Vértice de objetivo ou final."""
     g = defaultdict(list)
     for l,r,c in edges:
         g[l].append((c,r))
