@@ -102,16 +102,16 @@ def already_exists(name, lst):
             return node
     return None
 
-def get_city_byname(cities, name):
+def get_county_byname(counties, name):
     """Retorna o município especificado.
     
     Retorna um objeto do tipo County.
 
-    - cities : lista de municípios.
+    - counties : lista de municípios.
     - name : nome do município desejado."""
-    for city in cities:
-        if city.name == name:
-            return city
+    for county in counties:
+        if county.name == name:
+            return county
     return None
 
 def dijkstra(edges, f, t):
@@ -147,8 +147,8 @@ if __name__ == "__main__":
     # Varre a matriz e cria uma lista de Vértices.
     vertexes = list()
     for i in range(len(values)):
-        current_city = values[i][0]
-        current_node = already_exists(current_city, vertexes)
+        current_county = values[i][0]
+        current_node = already_exists(current_county, vertexes)
         if current_node:
             new_neighbour = Vertex()
             new_neighbour.name = values[i][1]
@@ -175,13 +175,13 @@ if __name__ == "__main__":
     map_values = map_data.values    # Transforma os dados em uma matriz.
 
     # Cria os MapDots que representam os pontos no mapa.
-    map_cities = [County(map_values[i][0], (map_values[i][1], map_values[i][2])) for i in range(len(map_values))]
-    city_count = len(map_cities)
+    map_counties = [County(map_values[i][0], (map_values[i][1], map_values[i][2])) for i in range(len(map_values))]
+    county_count = len(map_counties)
 
     route_path = None   # Variável do município atual.
     route_dist = None   # Variável da distância da rota atual.
-    from_city = None    # Variável do município de origem.
-    to_city = None      # Variável do município de destino.
+    from_county = None    # Variável do município de origem.
+    to_county = None      # Variável do município de destino.
 
     running = True  # Determina se o programa está ativo.
     while running:
@@ -198,33 +198,33 @@ if __name__ == "__main__":
                     running = False
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:   # Botão direito do mouse determina o município de origem do mapa.
-                    for city in map_cities:
-                        if city.rect.colliderect(mouse_rect): # Verifica se o retângulo do ponteiro colide com o retângulo do ponto no mapa.
-                            from_city = city.name
+                    for county in map_counties:
+                        if county.rect.colliderect(mouse_rect): # Verifica se o retângulo do ponteiro colide com o retângulo do ponto no mapa.
+                            from_county = county.name
                 elif event.button == 3: # Botão esquerdo do mouse determina o município de destino do mapa.
-                    for city in map_cities:
-                        if city.rect.colliderect(mouse_rect):
-                            to_city = city.name
-                if from_city and to_city:   # Traça a rota entre os municípios escolhidos no mapa.
-                    path = dijkstra(edges, from_city, to_city)
+                    for county in map_counties:
+                        if county.rect.colliderect(mouse_rect):
+                            to_county = county.name
+                if from_county and to_county:   # Traça a rota entre os municípios escolhidos no mapa.
+                    path = dijkstra(edges, from_county, to_county)
                     route_dist = path[0]
                     make_path = lambda tupla: (*make_path(tupla[1]), tupla[0]) if tupla else () # Função lambda recursiva que organiza a rota.
                     route_path = make_path(path[1])
                     # Imprime a rota no console.
-                    print('\nRota: {} ate {}\nDistancia: aprox. {} km.\nPercurso: {}\n'.format(from_city, to_city, ceil(route_dist), route_path))
+                    print('\nRota: {} ate {}\nDistancia: aprox. {} km.\nPercurso: {}\n'.format(from_county, to_county, ceil(route_dist), route_path))
 
         screen.fill(COLOR_WHITE)    # Preenche o fundo com a cor específica.
         screen.blit(map_image_scaled, (0, 0))   # Desenha a imagem do mapa.
 
-        for city in map_cities: # Varre a lista de municípios.
-            pygame.draw.circle(screen, COLOR_BLACK, city.pos, DOT_RADIUS) # Desenha o ponto do município no mapa.
-            name_text = medium_font.render(city.name, True, COLOR_BLACK)    # Cria o texto que representa o nome do município.
-            screen.blit(name_text, (city.pos[0]-len(city.name)*3, city.pos[1]))   # Desenha o nome do município no mapa.
+        for county in map_counties: # Varre a lista de municípios.
+            pygame.draw.circle(screen, COLOR_BLACK, county.pos, DOT_RADIUS) # Desenha o ponto do município no mapa.
+            name_text = medium_font.render(county.name, True, COLOR_BLACK)    # Cria o texto que representa o nome do município.
+            screen.blit(name_text, (county.pos[0]-len(county.name)*3, county.pos[1]))   # Desenha o nome do município no mapa.
 
         if route_path:    # Desenha as linhas da rota atual.
             for i in range(len(route_path)-1):
-                pygame.draw.line(screen, COLOR_BLACK, get_city_byname(map_cities, route_path[i]).pos, get_city_byname(map_cities, route_path[i+1]).pos, LINE_WIDTH)
-                title_text = title_font.render('Rota: {} até {}, Distância: aprox. {} km.'.format(from_city, to_city, ceil(route_dist)), True, COLOR_BLACK)
+                pygame.draw.line(screen, COLOR_BLACK, get_county_byname(map_counties, route_path[i]).pos, get_county_byname(map_counties, route_path[i+1]).pos, LINE_WIDTH)
+                title_text = title_font.render('Rota: {} até {}, Distância: aprox. {} km.'.format(from_county, to_county, ceil(route_dist)), True, COLOR_BLACK)
                 screen.blit(title_text, (SCREEN_SIZE[0]/4 - 70, 0))
 
 
