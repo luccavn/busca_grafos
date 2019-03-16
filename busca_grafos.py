@@ -10,29 +10,34 @@ from math import ceil, sqrt
 # Constantes #
 ##############
 
-COLOR_BLACK = (0,0,0)       # Valores RGB da cor preta.
-COLOR_WHITE = (255,255,255) # Valores RGB da cor branca.
-SCREEN_SIZE = (800, 600)    # Dimensões da janela.
-FONT_SIZE = 11              # Tamanho da fonte.
-DOT_RADIUS = 4              # Raio dos pontos do mapa.
-LINE_WIDTH = 2              # Espessura das linhas de rota.
+COLOR_BLACK = (0,0,0)           # Valores RGB da cor preta.
+COLOR_WHITE = (255,255,255)     # Valores RGB da cor branca.
+SCREEN_SIZE = (800, 600)        # Dimensões da janela.
+FONT_FAMILY = 'Consolas'        # Nome da fonte.
+FONT_SIZE = 11                  # Tamanho da fonte.
+DOT_RADIUS = 3                  # Raio dos pontos do mapa.
+LINE_WIDTH = 2                  # Espessura das linhas de rota.
+ARQ_MAPA = 'mapa_vale.png'      # Nome do arquivo do mapa.
+ARQ_DISTANCIAS = 'distancias.csv'     # Nome do arquivo de distâncias.
+ARQ_MUNICIPIOS = 'municipios.csv'    # Nome do arquivo de municípios.
 
 #################
 # Inicialização #
 #################
 
-root_dir = path.dirname(path.abspath(__file__)) # Diretório raiz do projeto.
-map_path = path.join(root_dir, 'mapa_vale.png') # Diretório da imagem do mapa.
-
 pygame.init()   # Inicializa os módulos do pygame.
+
+root_dir = path.dirname(path.abspath(__file__)) # Diretório raiz do projeto.
+map_path = path.join(root_dir, 'res\\' + ARQ_MAPA) # Diretório da imagem do mapa.
+
 pygame.display.set_caption('Algoritmos de Busca em Grafo - Vale do Paraíba')   # Altera o título da janela.
 
 screen = pygame.display.set_mode(SCREEN_SIZE)    # Altera as dimensões da janela.
 
 # Carrega fontes específicas do sistema para uso na interface do usuário.
-sys_font = pygame.font.SysFont('Comic Sans MS', FONT_SIZE)
-title_font = pygame.font.SysFont('Comic Sans MS', FONT_SIZE+10)
-medium_font = pygame.font.SysFont('Comic Sans MS', FONT_SIZE+2)
+sys_font = pygame.font.SysFont(FONT_FAMILY, FONT_SIZE)
+title_font = pygame.font.SysFont(FONT_FAMILY, FONT_SIZE+10)
+medium_font = pygame.font.SysFont(FONT_FAMILY, FONT_SIZE+2)
 
 # Carrega a imagem do mapa para uso na interface do usuário.
 map_image = pygame.image.load(map_path)
@@ -167,7 +172,7 @@ def dijkstra(edges, f, t):
 if __name__ == "__main__":
 
     # Faz a leitura dos dados contidos no arquivo dist_vale.csv e cria uma tabela.
-    data = pd.read_csv(path.join(root_dir, 'dist_vale.csv'), sep=',', encoding='utf-8')
+    data = pd.read_csv(path.join(root_dir, 'res\\' + ARQ_DISTANCIAS), sep=',', encoding='utf-8')
     data_matrix = data.values    # Transforma os valores da tabela em uma matriz.
     del data
 
@@ -198,7 +203,7 @@ if __name__ == "__main__":
             edges.append(new_edge)
 
     # Faz a leitura das posições dos pontos no mapa, contidos no arquivo map_dots.csv
-    data = pd.read_csv(path.join(root_dir, 'map_dots.csv'), sep=',', encoding='utf-8')
+    data = pd.read_csv(path.join(root_dir, 'res\\' + ARQ_MUNICIPIOS), sep=',', encoding='utf-8')
     data_matrix = data.values    # Transforma os dados em uma matriz.
     del data
 
