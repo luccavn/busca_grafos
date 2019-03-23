@@ -1,0 +1,166 @@
+﻿From,To,Distance
+Caraguatatuba,Sao Sebastiao,26.8
+Caraguatatuba,Ubatuba,47.3
+Caraguatatuba,Natividade da Serra,60.8
+Caraguatatuba,Paraibuna,49.8
+Caraguatatuba,Ilhabela,31.0
+Sao Sebastiao,Caraguatatuba,26.8
+Sao Sebastiao,Ilhabela,5.0
+Ilhabela,Caraguatatuba,31.0
+Ilhabela,Sao Sebastiao,5.0
+Paraibuna,Natividade da Serra,51.4
+Paraibuna,Jambeiro,21.1
+Paraibuna,Santa Branca,49.3
+Paraibuna,Redencao da Serra,45.3
+Natividade da Serra,Paraibuna,51.2
+Natividade da Serra,Caraguatatuba,61.3
+Natividade da Serra,Ubatuba,108.1
+Ubatuba,Caraguatatuba,47.9
+Ubatuba,Natividade da Serra,108.2
+Ubatuba,Sao Luis do Paraitinga,53.7
+Ubatuba,Cunha,116.2
+Santa Branca,Paraibuna,48.3
+Santa Branca,Jambeiro,46.1
+Santa Branca,Jacarei,19.1
+Jacarei,Igarata,28.8
+Jacarei,Sao Jose dos Campos,12.5
+Jacarei,Jambeiro,43.9
+Igarata,Sao Jose dos Campos,38.7
+Sao Jose dos Campos,Jacarei,13.2
+Sao Jose dos Campos,Igarata,37.8
+Sao Jose dos Campos,Jambeiro,34.5
+Sao Jose dos Campos,Cacapava,25.9
+Sao Jose dos Campos,Monteiro Lobato,39.8
+Jambeiro,Paraibuna,21.4
+Jambeiro,Redencao da Serra,66.8
+Jambeiro,Santa Branca,46.9
+Jambeiro,Cacapava,25.1
+Jambeiro,Sao Jose dos Campos,35.7
+Jambeiro,Jacarei,43.7
+Cacapava,Sao Jose dos Campos,26.5
+Cacapava,Taubate,21.9
+Cacapava,Jambeiro,24.8
+Cacapava,Redencao da Serra,51.4
+Cacapava,Monteiro Lobato,27.1
+Monteiro Lobato,Sao Jose dos Campos,40.4
+Monteiro Lobato,Cacapava,26.8
+Monteiro Lobato,Taubate,47.8
+Monteiro Lobato,Tremembe,61.0
+Monteiro Lobato,Santo Antonio do Pinhal,37.5
+Redencao da Serra,Natividade da Serra,22.3
+Redencao da Serra,Paraibuna,45.6
+Redencao da Serra,Jambeiro,68.0
+Redencao da Serra,Cacapava,49.3
+Redencao da Serra,Taubaté,36.4
+Redencao da Serra,Sao Luis do Paraitinga,35.0
+Taubate,Cacapava,20.6
+Taubate,Redencao da Serra,36.5
+Taubate,Tremembe,7.2
+Taubate,Pindamonhangaba,17.0
+Taubate,Lagoinha,64.6
+Taubate,Sao Luis do Paraitinga,45.8
+Tremembe,Taubate,7.4
+Tremembe,Monteiro Lobato,60.9
+Tremembe,Pindamonhangaba,12.1
+Santo Antonio do Pinhal,Pindamonhangaba,32.9
+Santo Antonio do Pinhal,Monteiro Lobato,37.5
+Santo Antonio do Pinhal,Campos do Jordao,20.0
+Santo Antonio do Pinhal,Sao Bento do Sapucai,28.8
+Sao Bento do Sapucai,Campos do Jordao,29.4
+Sao Bento do Sapucai,Santo Antonio do Pinhal,29.0
+Campos do Jordao,Sao Bento do Sapucai,28.6
+Campos do Jordao,Santo Antonio do Pinhal,20.1
+Campos do Jordao,Pindamonhangaba,42.6
+Campos do Jordao,Guaratingueta,80.3
+Pindamonhangaba,Tremembe,11.5
+Pindamonhangaba,Santo Antonio do Pinhal,33.4
+Pindamonhangaba,Campos do Jordao,42.6
+Pindamonhangaba,Taubate,17.4
+Pindamonhangaba,Potim,35.1
+Pindamonhangaba,Roseira,22.3
+Pindamonhangaba,Guaratingueta,39.4
+Sao Luis do Paraitinga,Ubatuba,52.3
+Sao Luis do Paraitinga,Natividade da Serra,40.6
+Sao Luis do Paraitinga,Redenção da Serra,35.6
+Sao Luis do Paraitinga,Taubate,45.8
+Sao Luis do Paraitinga,Lagoinha,24.1
+Sao Luis do Paraitinga,Cunha,63.7
+Lagoinha,Sao Luis do Paraitinga,23.9
+Lagoinha,Taubate,64.3
+Lagoinha,Roseira,66.3
+Lagoinha,Aparecida,56.1
+Lagoinha,Cunha,33.3
+Lagoinha,Guaratingueta,54.1
+Roseira,Aparecida,11.7
+Roseira,Pindamonhangaba,18.6
+Roseira,Lagoinha,66.7
+Roseira,Potim,1.4
+Potim,Roseira,12.8
+Potim,Pindamonhangaba,31.9
+Potim,Guaratingueta,10.8
+Potim,Aparecida,2.9
+Guaratingueta,Pindamonhangaba,36.6
+Guaratingueta,Potim,10.8
+Guaratingueta,Campos do Jordao,78.7
+Guaratingueta,Aparecida,8.3
+Guaratingueta,Cunha,52.1
+Guaratingueta,Lorena,12.2
+Guaratingueta,Piquete,31.2
+Guaratingueta,Lagoinha,54.1
+Aparecida,Lagoinha,56.1
+Aparecida,Roseira,11.7
+Aparecida,Potim,2.9
+Aparecida,Guaratingueta,8.3
+Cunha,Ubatuba,116.0
+Cunha,Sao Luis do Paraitinga,63.5
+Cunha,Lagoinha,32.7
+Cunha,Guaratingueta,51.4
+Cunha,Lorena,62.6
+Cunha,Silveiras,92.8
+Cunha,Areias,118.5
+Cunha,Sao Jose do Barreiro,140.0
+Lorena,Cunha,63.2
+Lorena,Guaratingueta,12.8
+Lorena,Piquete,18.0
+Lorena,Canas,8.8
+Lorena,Cachoeira Paulista,18.7
+Canas,Lorena,10.3
+Canas,Cachoeira Paulista,2.6
+Piquete,Guaratingueta,35.7
+Piquete,Lorena,18.2
+Piquete,Cachoeira Paulista,23.5
+Piquete,Cruzeiro,26.2
+Cruzeiro,Cachoeira Paulista,17.6
+Cruzeiro,Piquete,28.2
+Cruzeiro,Lavrinhas,6.7
+Cruzeiro,Silveiras,25.2
+Lavrinhas,Cruzeiro,6.6
+Lavrinhas,Silveiras,33.9
+Lavrinhas,Queluz,26.6
+Queluz,Lavrinhas,26.0
+Queluz,Silveiras,43.6
+Queluz,Areias,21.1
+Silveiras,Cunha,66.0
+Silveiras,Lorena,36.2
+Silveiras,Cachoeira Paulista,2.3
+Silveiras,Cruzeiro,25.1
+Silveiras,Lavrinhas,33.9
+Silveiras,Queluz,43.6
+Silveiras,Areias,27.2
+Cachoeira Paulista,Lorena,18.7
+Cachoeira Paulista,Canas,2.6
+Cachoeira Paulista,Piquete,23.5
+Cachoeira Paulista,Cruzeiro,17.6
+Cachoeira Paulista,Silveiras,2.3
+Areias,Queluz,21.1
+Areias,Silveiras,27.2
+Areias,Cunha,93.1
+Areias,Sao Jose do Barreiro,21.2
+Sao Jose do Barreiro,Areias,21.2
+Sao Jose do Barreiro,Arapei,29.2
+Sao Jose do Barreiro,Bananal,47.3
+Sao Jose do Barreiro,Cunha,114.3
+Arapei,Sao Jose do Barreiro,29.2
+Arapei,Bananal,18.1
+Bananal,Arapei,18.0
+Bananal,Sao Jose do Barreiro,47.2
