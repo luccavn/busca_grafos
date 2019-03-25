@@ -25,6 +25,7 @@ Santa Branca,Jacarei,19.1
 Jacarei,Igarata,28.8
 Jacarei,Sao Jose dos Campos,12.5
 Jacarei,Jambeiro,43.9
+Igarata,Jacarei,28.8
 Igarata,Sao Jose dos Campos,38.7
 Sao Jose dos Campos,Jacarei,13.2
 Sao Jose dos Campos,Igarata,37.8
@@ -51,7 +52,7 @@ Redencao da Serra,Natividade da Serra,22.3
 Redencao da Serra,Paraibuna,45.6
 Redencao da Serra,Jambeiro,68.0
 Redencao da Serra,Cacapava,49.3
-Redencao da Serra,Taubaté,36.4
+Redencao da Serra,Taubate,36.4
 Redencao da Serra,Sao Luis do Paraitinga,35.0
 Taubate,Cacapava,20.6
 Taubate,Redencao da Serra,36.5
@@ -81,7 +82,7 @@ Pindamonhangaba,Roseira,22.3
 Pindamonhangaba,Guaratingueta,39.4
 Sao Luis do Paraitinga,Ubatuba,52.3
 Sao Luis do Paraitinga,Natividade da Serra,40.6
-Sao Luis do Paraitinga,Redenção da Serra,35.6
+Sao Luis do Paraitinga,Redencao da Serra,35.6
 Sao Luis do Paraitinga,Taubate,45.8
 Sao Luis do Paraitinga,Lagoinha,24.1
 Sao Luis do Paraitinga,Cunha,63.7

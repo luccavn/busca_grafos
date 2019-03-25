@@ -1,10 +1,11 @@
 import pygame
 import pandas as pd
 from os import path
-from collections import defaultdict
+from collections import defaultdict, deque
 from heapq import heappush, heappop
 from math import ceil, sqrt
 from pygame.locals import Rect
+from lib.ordered_set import OrderedSet
 
 ################
 ## CONSTANTES ##
@@ -37,49 +38,49 @@ medium_font = pygame.font.SysFont(Config.FONT_FAMILY, Config.FONT_SIZE+2)
 map_image = pygame.image.load(Config.map_path)
 map_image_scaled = pygame.transform.scale(map_image, Config.SCREEN_SIZE)
 
-#############
-## CLASSES ##
-#############
+#######################
+## CLASSES E FUNÇÕES ##
+#######################
 
-class Vertex:
-    """ Representa um vértice do grafo 
+class Graph(dict):
+    """ Representa um grafo.
 
-    - name : Identificador do vértice.
-    - neighbours : Set que armazena os vizinhos deste vértice.
-    - distance : Distância do vizinho até este vértice.
+    Esta classe é uma implementação de um dicionário,
+    ou seja, possui as mesmas funcionalidades de um 
+    objeto do tipo dict().
     """
+    
+    def create_from_csv(self, path):
+        """ Lê um arquivo .csv e cria os vértices do grafo.
 
-    def __init__(self):
-        self._name = None
-        self._neighbours = set()
-        self._distance = None
-    
-    @property
-    def name(self):
-        return self._name
-    
-    @name.setter
-    def name(self, value):
-        self._name = value
-    
-    @property
-    def distance(self):
-        return self._distance
-    
-    @distance.setter
-    def distance(self, value):
-        self._distance = value
-    
-    @property
-    def neighbours(self):
-        return self._neighbours
-    
-    def add_neighbour(self, neighbour):
-        self._neighbours.add(neighbour)
+        O arquivo deve conter 3 colunas separadas por vírgulas, onde:
+        - Primeira coluna: Identificador do vértice origem;
+        - Segunda coluna: Identificador do vértice vizinho;
+        - Terceira coluna: Distância entre os dois vértices.
 
-class County():
+        Parâmetros:
+        - path : caminho do arquivo .csv
+        """
+        # Fazemos a leitura das distâncias entre os municípios, gerando uma tabela de 3 colunas:
+        data = pd.read_csv(path, sep=',', encoding='utf-8')
+        # Convertemos a tabela em uma matriz:
+        data_matrix = data.values
+        # Criamos um dicionário onde as chaves serão o nome dos municípios da primeira coluna
+        # e todas elas terão uma lista vazia como valor. Utilizamos listas do tipo set() 
+        # pois elas possuem um acesso mais rápido e não aceitam objetos repetidos:
+        for row in data_matrix:
+            from_county = row[0]
+            self[from_county] = set()
+        # Agora adicionamos os vizinhos desses municípios, que são os municípios da segunda coluna.
+        # Note que por enquanto não estamos utilizando a coluna de distâncias:
+        for from_county, to_county, distance in data_matrix:
+            self[from_county].add(to_county)
+
+
+class County:
     """ Representa um município no mapa 
 
+    Parâmetros:
     - name : Identificador do município.
     - pos : Posição do ponto do município no mapa.
     - rect : Retângulo de colisão do ponto do município.
@@ -88,7 +89,10 @@ class County():
     def __init__(self, name, pos):
         self._name = name
         self._pos = pos
-        self._rect = Rect((pos[0], pos[1]), (Config.DOT_RADIUS+2, Config.DOT_RADIUS+2))
+        self._neighbours = set()
+        rect_pos = (pos[0], pos[1])
+        rect_dim = (Config.DOT_RADIUS+2, Config.DOT_RADIUS+2)
+        self._rect = Rect(rect_pos, rect_dim)
 
     @property
     def name(self):
@@ -102,28 +106,57 @@ class County():
     def rect(self):
         return self._rect
 
-#############
-## MÉTODOS ##
-#############
+    @property
+    def neighbours(self):
+        return self._neighbours
 
-def already_exists(name, v_list):
-    """ Retorna um vértice já existente em uma lista.
-    
-    - name : Identificador do vértice.
-    - v_list : Lista de vértices.
+    def add_neighbour(self, neighbour):
+        if isinstance(neighbour, (tuple, list, set)):
+            for neigh in neighbour:
+                self._neighbours.add(neigh)
+        else:
+            self._neighbours.add(neighbour)
 
-    Se o objeto do tipo Node não existir na lista, retorna None.
+
+class Edge:
+    """ Representa uma aresta.
+
+    Parâmetros:
+    - origin : Identificador da origem.
+    - destiny : Identificador do destino.
+    - orig_pos : Posição de origem.
+    - dest_pos : Posição de destino.
     """
-    for vertex in v_list:
-        if vertex.name == name:
-            return vertex
-    return None
+
+    def __init__(self, origin, orig_pos, destiny, dest_pos):
+        self._origin = origin
+        self._destiny = destiny
+        self._orig_pos = orig_pos
+        self._dest_pos = dest_pos
+
+    @property
+    def origin(self):
+        return self._origin
+
+    @property
+    def destiny(self):
+        return self._destiny
+
+    @property
+    def origin_pos(self):
+        return self._orig_pos
+
+    @property
+    def destiny_pos(self):
+        return self._dest_pos
+
 
 def get_county_byname(counties, name):
     """ Retorna o município cujo o nome foi especificado.
     
-    Retorna um objeto do tipo County.
+    Retorna um objeto do tipo County ou None caso não seja encontrado.
 
+    Parâmetros:
     - counties : lista de municípios.
     - name : nome do município desejado.
     """
@@ -132,37 +165,80 @@ def get_county_byname(counties, name):
             return county
     return None
 
-######################
-## MÉTODOS DE BUSCA ##
-######################
 
-def dijkstra(edges, f, t):
-    """ Algoritmo de Dijkstra
+def get_edge(edge_list, origin, destiny):
+    """ Retorna a aresta com a origem e o destino especificados,
+    não importando o sentido.
 
-    Encontra a rota mais curta entre dois municípios.
-    
-    - edges : Arestas do grafo.
-    - f : Vértice de origem ou inicial.
-    - t : Vértice de objetivo ou final.
+    Retorna um objeto do tipo Edge ou None caso não seja encontrado.
+
+    Parâmetros:
+    - edge_list : Lista de arestas.
+    - origin : Identificador da origem.
+    - destiny : Identificador do destino.
     """
-    g = defaultdict(list)
-    for l,r,c in edges:
-        g[l].append((c,r))
-    q, seen, mins = [(0,f,())], set(), {f: 0}
-    while q:
-        (cost,v1,path) = heappop(q)
-        if v1 not in seen:
-            seen.add(v1)
-            path = (v1, path)
-            if v1 == t: return (cost, path)
-            for c, v2 in g.get(v1, ()):
-                if v2 in seen: continue
-                prev = mins.get(v2, None)
-                next = cost + c
-                if prev is None or next < prev:
-                    mins[v2] = next
-                    heappush(q, (next, v2, path))
-    return float("inf")
+    for edge in edge_list:
+        if edge.origin == origin and edge.destiny == destiny\
+            or edge.origin == destiny and edge.destiny == origin:
+            return edge
+    return None
+
+
+#########################
+## MÉTODO DE AMPLITUDE ##
+#########################
+
+def bfs(graph, origin, goal):
+    """ Visita todos os vizinhos partindo do vértice origin até encontrar o vértice goal.
+    
+    Retorna uma tupla com os vértices visitados e o caminho mais curto em forma de lista.
+
+    Parâmetros:
+    - origin : vértice inicial
+    - goal : vértice objetivo
+    """
+    queue = [(origin,[origin])]
+    visited = OrderedSet()
+    while queue:
+        vertex, path = queue.pop(0)
+        visited.add(vertex)
+        for neighbour in graph[vertex]:
+            if neighbour == goal:
+                #print(queue)
+                return (visited, path + [goal])
+            else:
+                if neighbour not in visited:
+                    visited.add(neighbour)
+                    queue.append((neighbour, path + [neighbour]))
+                    #print(queue)
+
+############################
+## MÉTODO DE PROFUNDIDADE ##
+############################
+
+def dfs(graph, origin, goal):
+    """ Inicia no vértice origin, voltando até encontrar o vértice goal.
+    
+    Retorna uma tupla com os vértices visitados e o caminho mais curto em forma de lista.
+
+    Parâmetros:
+    - origin : vértice inicial
+    - goal : vértice objetivo
+    """
+    stack = [(origin,[origin])]
+    visited = OrderedSet()
+    while stack:
+        vertex, path = stack.pop()
+        visited.add(vertex)
+        for neighbour in graph[vertex]:
+            if neighbour == goal:
+                #print(stack)
+                return (visited, path + [goal])
+            else:
+                if neighbour not in visited:
+                    visited.add(neighbour)
+                    stack.append((neighbour, path + [neighbour]))
+                    #print(stack)
 
 #################
 ## FUNÇÃO MAIN ##
@@ -170,113 +246,140 @@ def dijkstra(edges, f, t):
 
 if __name__ == "__main__":
 
-    # Fazemos a leitura das distâncias entre os municípios, gerando uma tabela:
-    data = pd.read_csv(Config.distances_path, sep=',', encoding='utf-8')
+    # Instanciamos nosso grafo e geramos sua estrutura através da
+    # função create_from_csv que lê um arquivo .csv e usa os dados
+    # para criar os vértices do grafo:
+    graph = Graph()
+    graph.create_from_csv(Config.distances_path)
 
-    # Transformamos os valores da tabela em uma matriz:
-    data_matrix = data.values
+    # O grafo é apenas a representação do mapa em forma de lista,
+    # ele será útil apenas durante a aplicação dos algoritmos,
+    # portanto teremos que criar os objetos que realmente guardarão
+    # as informações de cada município, além das arestas do grafo.
 
-    vertexes = list()  # Lista global de vértices.
-    # Varremos a matriz de dados e geramos os vértices:
-    for data in data_matrix:
-        current_county = data[0]  # Guardamos o nome do município da 1ª coluna.
-        current_vertex = already_exists(current_county, vertexes)  # Verificamos se já existe um vértice deste município.
-        # Se o método already_exists() retornar None significa que ainda não criamos um vértice para este município:
-        if current_vertex is None:
-            new_vertex = Vertex()  # Criamos o vértice do município atual.
-            new_neighbour = Vertex()  # Criamos o vértice do vizinho.
-            new_vertex.name = data[0]  # Atribuímos ao vértice principal o nome da 1ª coluna.
-            new_neighbour.name = data[1]  # Atribuímos ao vizinho o nome da 2ª coluna.
-            new_neighbour.distance = data[2]  # Atribuímos ao vizinho a distância da 3ª coluna.
-            new_vertex.add_neighbour(new_neighbour)  # Adicionamos o vizinho ao vértice principal.
-            vertexes.append(new_vertex)  # Adicionamos o vértice na lista global de vértices.
-        else:  # Se um vértice deste município já existir, apenas adicionamos o município da 2ª coluna como vizinho dele:
-            new_neighbour = Vertex()
-            new_neighbour.name = data[1]
-            new_neighbour.distance = data[2]
-            current_vertex.add_neighbour(new_neighbour)
-
-    # Varremos a lista global de vértices e geramos as arestas para uso no algoritmo de Dijkstra:
-    edges = list()
-    for vertex in vertexes:
-        for neighbour in vertex.neighbours:
-            new_edge = (vertex.name, neighbour.name, neighbour.distance)
-            edges.append(new_edge)
-
-    # Carregamos o arquivo que possui a posição dos municípios no mapa:
+    # Fazemos a leitura das informações do mapa, gerando uma tabela
+    # de 3 colunas, depois convertemos esta tabela em uma matriz:
     data = pd.read_csv(Config.positions_path, sep=',', encoding='utf-8')
-
-    # Transformamos os dados em uma matriz.
     data_matrix = data.values
 
-    # Criamos uma lista de objetos do tipo County,
-    # esses objetos representam os municípios do mapa.
-    # data[0] -> nome do município;
-    # data[1] -> posição no eixo x;
-    # data[2] -> posição no eixo y.
-    map_counties = [County(name=data[0], pos=(data[1], data[2])) for data in data_matrix]
-    county_count = len(map_counties)  # Quant. de elementos da lista.
+    map_counties = set()    # Lista de municípios.
 
-    route_path = None   # Variável do município atual.
-    route_dist = None   # Variável da distância da rota atual.
-    from_county = None  # Variável do município de origem.
-    to_county = None    # Variável do município de destino.
+    # Para cada linha i da matriz criamos um novo objeto
+    # do tipo County e o adicionamos na lista:
+    for county_name, pos_x, pos_y in data_matrix:
+        new_county = County(name=county_name, pos=(pos_x, pos_y))
+        map_counties.add(new_county)
 
-    running = True  # Determina se o programa está ativo.
-    while running:
+    # Adicionamos os vizinhos desses municípios de acordo com o grafo
+    # que possui todas as informações de vizinhança:
+    for county, neighbours in graph.items():
+        for neighbour in neighbours:
+            # Buscamos pelo objeto dos municípios através da função get_county_byname():
+            county_object = get_county_byname(map_counties, county)
+            neighbour_object = get_county_byname(map_counties, neighbour)
+            # Adicionamos o vizinho ao município de origem:
+            county_object.add_neighbour(neighbour_object)
+    
+    map_edges = set()   # Lista de arestas.
+
+    # Para cada vértice do grafo pegamos o nome e a lista
+    # de vizinhos e buscamos pelo objeto do tipo County
+    # para que possamos fazer as ligações:
+    for county, neighbours in graph.items():
+        for neighbour in neighbours:
+            # Verificamos se a aresta desses municípios já existe:
+            if get_edge(map_edges, county, neighbour) is None:
+                # Buscamos pelo objeto dos municípios através da função get_county_byname():
+                county_object = get_county_byname(map_counties, county)
+                neighbour_object = get_county_byname(map_counties, neighbour)
+                # Criamos a aresta e a adicionamos na lista de arestas:
+                new_edge = Edge(origin=county, orig_pos=county_object.pos, destiny=neighbour, dest_pos=neighbour_object.pos)
+                map_edges.add(new_edge)
+
+    # Variáveis auxiliares:
+    method_index = 0        # Índice do método de busca selecionado.
+    found_path = None       # Caminho realizado pelo algoritmo.
+    visited_counties = None # Municípios visitados pelo algoritmo.
+    from_county = None      # Município de origem.
+    to_county = None        # Município de destino.
+    draw_edges = False      # Determina se as arestas serão mostradas na interface.
+    exit_ui = False         # Determina se o programa irá encerrar.
+    
+    while not exit_ui:
         pygame.event.pump() # Atualizamos os eventos do pygame.
 
         mouse_pos = pygame.mouse.get_pos()  # Atualizamos a posição do ponteiro do mouse.
         
         # Atualizamos o retângulo de colisão do ponteiro do mouse:
-        left, top = (mouse_pos[0], mouse_pos[1])
-        width, height = (Config.DOT_RADIUS, Config.DOT_RADIUS)
+        left, top = (mouse_pos[0], mouse_pos[1])    # Posicionamento.
+        width, height = (Config.DOT_RADIUS, Config.DOT_RADIUS)  # Dimensões.
         mouse_rect = Rect((left, top), (width, height))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # Evento de encerramento do programa.
-                running = False  # Finaliza o programa.
+                exit_ui = True  # Finaliza o programa.
             if event.type == pygame.KEYDOWN:  # Verificamos se alguma tecla foi pressionada.
-                if event.key == pygame.K_ESCAPE:  # K_ESCAPE -> tecla ESC.
-                    running = False  # Finaliza o programa.
-            if event.type == pygame.MOUSEBUTTONUP:  # Verificamos se algum botão do mouse foi despressionado.
-                # Verificamos se o retângulo do ponteiro colide com o retângulo de algum ponto no mapa:
+                if event.key == pygame.K_ESCAPE:  # K_ESCAPE -> Tecla Esc.
+                    exit_ui = True  # Finaliza o programa.
+                elif event.key == pygame.K_SPACE:   # K_SPACE -> Tecla Espaço.
+                    draw_edges = True if draw_edges is False else False # Alternamos entre mostrar ou não as arestas na interface.
+                elif event.key == pygame.K_LEFT:    # K_LEFT -> Seta esquerda.
+                    method_index = method_index - 1 if method_index > 0 else len(Config.METHOD_NAMES)-1 # Alterna entre os métodos de busca.
+                elif event.key == pygame.K_RIGHT:   # K_RIGHT -> Seta direita.
+                    method_index = method_index + 1 if method_index < len(Config.METHOD_NAMES)-1 else 0 # Alterna entre os métodos de busca.
+            # Verificamos se algum botão do mouse foi pressionado:
+            if event.type == pygame.MOUSEBUTTONUP:
                 for county in map_counties:
-                    # Função que verifica colisão de retângulos:
+                    # Verificamos se o retângulo do ponteiro colide com o retângulo de algum ponto no mapa:
                     if county.rect.colliderect(mouse_rect):
-                        # Botão direito do mouse determina o município origem e botão esquerdo determina o município destino:
-                        if event.button == MOUSE_RIGHT:
-                            from_county = county.name
-                        elif event.button == MOUSE_LEFT:
-                            to_county = county.name
-                # Caso já tenhamos os municípios origem e destino,
-                # geramos a rota entre eles:
+                        # Os botões esquerdo e direito do mouse determinam, respectivamente, os municípios de origem e de destino:
+                        if event.button == MOUSE_LEFT:
+                            from_county = county
+                        elif event.button == MOUSE_RIGHT:
+                            to_county = county
+                # Caso já tenhamos os municípios de origem e de destino selecionados, geramos a rota entre eles:
                 if (from_county and to_county) is not None:
-                    path = dijkstra(edges, from_county, to_county)
-                    route_dist = path[0]
-                    make_path = lambda tupla: (*make_path(tupla[1]), tupla[0]) if tupla else () # Função lambda recursiva que organiza a rota.
-                    route_path = make_path(path[1])
-                    # Imprimimos a rota no console:
-                    print('\nRota: {} ate {}\nDistancia: aprox. {} km.\nPercurso: {}\n'.format(from_county, to_county, ceil(route_dist), route_path))
+                    result = None
+                    # Verificamos qual método de busca está selecionado e chamamos a função do mesmo:
+                    if (method_index == 0):
+                        result = bfs(graph, from_county.name, to_county.name)   # Resultado do algoritmo de amplitude.
+                    else:
+                        result = dfs(graph, from_county.name, to_county.name)   # Resultado do algoritmo de profundidade.
+                    visited_counties = [county for county in result[0]]    # Municípios que foram visitados pelo algoritmo.
+                    found_path = result[1]       # Caminho mais curto da origem até o destino.
+                    # Imprimimos as informações no console:
+                    print('\n\n# Rota: {} ate {}.\n\nCaminho encontrado: {} passos -> {}.\n\nMunicípios visitados: {} -> {}'.format(from_county.name, to_county.name, len(found_path)-1, found_path, len(visited_counties), visited_counties))
 
-        screen.fill(COLOR_WHITE)    # Preenchemos o fundo da tela com a cor específica.
+        screen.fill(COLOR_WHITE)    # Preenchemos o fundo da tela com uma cor específica.
         screen.blit(map_image_scaled, (0, 0))   # Desenhamos a imagem do mapa na tela.
 
+        # Renderizamos as arestas por pares de vértices:
+        for edge in map_edges:
+            # Verificamos se a origem e o destino da aresta coincide com o caminho resultante:
+            is_path_edge = (found_path is not None) and (edge.origin in found_path and edge.destiny in found_path)
+            # Desenha as arestas que não fazem parte do caminho:
+            if draw_edges is True:
+                pygame.draw.line(screen, COLOR_BLACK, edge.origin_pos, edge.destiny_pos, Config.LINE_WIDTH)
+            # Desenha as arestas que fazem parte do caminho:
+            if is_path_edge:
+                pygame.draw.line(screen, COLOR_GREEN, edge.origin_pos, edge.destiny_pos, Config.LINE_WIDTH)
+
         # Caso já tenhamos a rota:
-        if route_path is not None:
-            # 1. Renderizamos as arestas por pares de vértices;
-            for i in range(len(route_path)-1):
-                county1_pos = get_county_byname(map_counties, route_path[i]).pos
-                county2_pos = get_county_byname(map_counties, route_path[i+1]).pos
-                pygame.draw.line(screen, COLOR_BLACK, county1_pos, county2_pos, Config.LINE_WIDTH)
-            # 2. Renderizamos um texto informativo acima do mapa:
-            info_text = 'Rota: {} até {}, Distância: aprox. {} km.'.format(from_county, to_county, ceil(route_dist))
+        if found_path is not None:
+            # Renderizamos um texto informativo acima do mapa:
+            info_text = 'De {} até {}. Passos: {}.'.format(from_county.name, to_county.name, len(found_path)-1)
             # Criamos uma superfície renderizável:
             text_surface = title_font.render(info_text, True, COLOR_BLACK)
             # Adaptamos a posição do texto de acordo com o nome do município:
-            text_position = (Config.SCREEN_SIZE[0]/4 - 10 * len(from_county) + len(to_county), 0)
+            text_position = (Config.SCREEN_SIZE[0]/4 - 9 * len(from_county.name) + len(to_county.name), 0)
             # Renderizamos a superfície do texto:
             screen.blit(text_surface, text_position)
+        
+        # Desenhamos o texto do método selecionado:
+        method_text = 'Método de busca: ' + Config.METHOD_NAMES[method_index]
+        method_surface = title_font.render(method_text, True, COLOR_BLACK)
+        method_position = (Config.SCREEN_SIZE[0]/4, Config.SCREEN_SIZE[1]-24)
+        screen.blit(method_surface, method_position)
 
         # Definimos as cores de destaque e renderizamos os municípios no mapa:
         for county in map_counties:
@@ -284,11 +387,8 @@ if __name__ == "__main__":
 
             # Definimos a cor verde para os municípios de origem e destino
             # e definimos a cor branca para os municípios que fazem parte da rota:
-            if route_path is not None:
-                if county.name == from_county or county.name == to_county:
-                    paint_color = COLOR_GREEN
-                elif county.name in route_path:
-                    paint_color = COLOR_WHITE
+            if (found_path is not None) and (county.name == from_county or county.name == to_county):
+                paint_color = COLOR_GREEN
 
             # Definimos a cor verde para os municípios nos quais o ponteiro colide:
             pointer_collides = county.rect.colliderect(mouse_rect)
