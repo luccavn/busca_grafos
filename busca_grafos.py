@@ -10,14 +10,12 @@ from lib.ordered_set import OrderedSet
 # CONSTANTES #
 ##############
 
-COLOR_BLACK = (0, 0, 0)             # Valores RGB da cor preta.
-COLOR_GREEN = (0, 255, 0)           # Valores RGB da cor verde.
-COLOR_RED = (255, 0, 0)
-COLOR_WHITE = (255, 255, 255)       # Valores RGB da cor branca.
-# Inteiro que representa o botão esquerdo do mouse.
-MOUSE_LEFT = 1
-# Inteiro que representa o botão direito do mouse.
-MOUSE_RIGHT = 3
+COLOR_BLACK = (0, 0, 0)         # Valores RGB da cor preta.
+COLOR_GREEN = (0, 255, 0)       # Valores RGB da cor verde.
+COLOR_RED = (255, 0, 0)         # Valores RGB da cor vermelha.
+COLOR_WHITE = (255, 255, 255)   # Valores RGB da cor branca.
+MOUSE_LEFT = 1                  # Representa clique esquerdo do mouse.
+MOUSE_RIGHT = 3                 # Representa clique direito do mouse.
 
 #################
 # INICIALIZAÇÃO #
@@ -37,7 +35,8 @@ sys_font = pygame.font.SysFont(Config.FONT_FAMILY, Config.FONT_SIZE)
 title_font = pygame.font.SysFont(Config.FONT_FAMILY, Config.FONT_SIZE+10)
 medium_font = pygame.font.SysFont(Config.FONT_FAMILY, Config.FONT_SIZE+2)
 
-# Carregamos e redimensionamos a imagem do mapa que será utilizada como imagem de fundo da interface:
+# Carregamos e redimensionamos a imagem do mapa que será utilizada como imagem
+# de fundo da interface:
 map_image = pygame.image.load(Config.map_path)
 map_image_scaled = pygame.transform.scale(map_image, Config.SCREEN_SIZE)
 
