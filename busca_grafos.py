@@ -64,18 +64,21 @@ class Graph(dict):
         Parâmetros:
         - path : caminho do arquivo .csv
         """
-        # Fazemos a leitura das distâncias entre os municípios, gerando uma tabela de 3 colunas:
+        # Fazemos a leitura das distâncias entre os municípios, gerando uma
+        # tabela de 3 colunas:
         data = pd.read_csv(path, sep=',', encoding='utf-8')
         # Convertemos a tabela em uma matriz:
         data_matrix = data.values
-        # Criamos um dicionário onde as chaves serão o nome dos municípios da primeira coluna
-        # e todas elas terão uma lista vazia como valor. Utilizamos listas do tipo set()
-        # pois elas possuem um acesso mais rápido e não aceitam objetos repetidos:
+        # Criamos um dicionário onde as chaves serão o nome dos municípios da 
+        # primeira coluna e todas elas terão uma lista vazia como valor.
+        # Utilizamos listas do tipo set() pois elas possuem um acesso mais
+        # rápido e não aceitam objetos repetidos:
         for row in data_matrix:
             from_city = row[0]
             self[from_city] = set()
-        # Agora adicionamos os vizinhos desses municípios, que são os municípios da segunda coluna.
-        # Note que por enquanto não estamos utilizando a coluna de distâncias:
+        # Agora adicionamos os vizinhos desses municípios, que são os
+        # municípios da segunda coluna. Note que por enquanto não estamos
+        # utilizando a coluna de distâncias:
         for from_city, to_city, distance in data_matrix:
             self[from_city].add(to_city)
 
@@ -294,7 +297,6 @@ if __name__ == "__main__":
     # que possui todas as informações de vizinhança:
     for city, neighbours in graph.items():
         for neighbour in neighbours:
-            # Buscamos pelo objeto dos municípios através da função get_city_byname():
             city_object = get_city_byname(map_cities, city)
             neighbour_object = get_city_byname(map_cities, neighbour)
             # Adicionamos o vizinho ao município de origem:
@@ -309,7 +311,6 @@ if __name__ == "__main__":
         for neighbour in neighbours:
             # Verificamos se a aresta desses municípios já existe:
             if get_edge(map_edges, city, neighbour) is None:
-                # Buscamos pelo objeto dos municípios através da função get_city_byname():
                 city_object = get_city_byname(map_cities, city)
                 neighbour_object = get_city_byname(map_cities, neighbour)
                 # Criamos a aresta e a adicionamos na lista de arestas:
@@ -339,23 +340,21 @@ if __name__ == "__main__":
         mouse_rect = Rect((left, top), (width, height))
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:  # Evento de encerramento do programa.
+            if event.type == pygame.QUIT:
                 exit_ui = True  # Finaliza o programa.
-            if event.type == pygame.KEYDOWN:  # Verificamos se alguma tecla foi pressionada.
-                if event.key == pygame.K_ESCAPE:  # K_ESCAPE -> Tecla Esc.
-                    exit_ui = True  # Finaliza o programa.
-                elif event.key == pygame.K_SPACE:   # K_SPACE -> Tecla Espaço.
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    exit_ui = True
+                elif event.key == pygame.K_SPACE:
                     # Alternamos entre mostrar ou não as arestas na interface.
                     draw_edges = True if draw_edges is False else False
-                elif event.key == pygame.K_LEFT:    # K_LEFT -> Seta esquerda.
+                elif event.key == pygame.K_LEFT:
                     # Alterna entre os métodos de busca.
                     method_index = method_index - \
                         1 if method_index > 0 else len(Config.METHOD_NAMES)-1
-                elif event.key == pygame.K_RIGHT:   # K_RIGHT -> Seta direita.
-                    # Alterna entre os métodos de busca.
+                elif event.key == pygame.K_RIGHT:
                     method_index = method_index + \
                         1 if method_index < len(Config.METHOD_NAMES)-1 else 0
-            # Verificamos se algum botão do mouse foi pressionado:
             if event.type == pygame.MOUSEBUTTONUP:
                 for city in map_cities:
                     # Verificamos se o retângulo do ponteiro colide com o
@@ -396,7 +395,8 @@ if __name__ == "__main__":
 
         # Renderizamos as arestas por pares de vértices:
         for edge in map_edges:
-            # Verificamos se a origem e o destino da aresta coincide com o caminho resultante:
+            # Verificamos se a origem e o destino da aresta coincide com o
+            # caminho resultante:
             is_path_edge = (found_path is not None) and (
                 edge.origin in found_path and edge.destiny in found_path)
             is_visited_edge = (found_path is not None) and (
@@ -438,11 +438,13 @@ if __name__ == "__main__":
             paint_color = COLOR_BLACK  # Cor padrão (município sem destaque).
 
             # Definimos a cor verde para os municípios de origem e destino
-            # e definimos a cor branca para os municípios que fazem parte da rota:
+            # e definimos a cor branca para os municípios que fazem parte da
+            # rota:
             if (found_path is not None) and (city.name == from_city or city.name == to_city):
                 paint_color = COLOR_GREEN
 
-            # Definimos a cor verde para os municípios nos quais o ponteiro colide:
+            # Definimos a cor verde para os municípios nos quais o ponteiro
+            # colide:
             pointer_collides = city.rect.colliderect(mouse_rect)
             if pointer_collides:
                 paint_color = COLOR_GREEN
