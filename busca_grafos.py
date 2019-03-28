@@ -1,26 +1,27 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+
 import pygame
 import pandas as pd
-from os import path
-from collections import defaultdict, deque
-from heapq import heappush, heappop
-from math import ceil, sqrt
 from pygame.locals import Rect
 from lib.ordered_set import OrderedSet
 
-################
-## CONSTANTES ##
-################
+##############
+# CONSTANTES #
+##############
 
 COLOR_BLACK = (0, 0, 0)             # Valores RGB da cor preta.
 COLOR_GREEN = (0, 255, 0)           # Valores RGB da cor verde.
 COLOR_RED = (255, 0, 0)
 COLOR_WHITE = (255, 255, 255)       # Valores RGB da cor branca.
-MOUSE_LEFT = 1                      # Inteiro que representa o botão esquerdo do mouse.
-MOUSE_RIGHT = 3                     # Inteiro que representa o botão direito do mouse.
+# Inteiro que representa o botão esquerdo do mouse.
+MOUSE_LEFT = 1
+# Inteiro que representa o botão direito do mouse.
+MOUSE_RIGHT = 3
 
-###################
-## INICIALIZAÇÃO ##
-###################
+#################
+# INICIALIZAÇÃO #
+#################
 
 Config = __import__('config')  # Importa as configurações.
 
@@ -28,7 +29,8 @@ pygame.init()   # Inicializa os módulos do pygame.
 
 pygame.display.set_caption(Config.WINDOW_TITLE)   # Altera o título da janela.
 
-screen = pygame.display.set_mode(Config.SCREEN_SIZE)    # Altera as dimensões da janela.
+# Altera as dimensões da janela.
+screen = pygame.display.set_mode(Config.SCREEN_SIZE)
 
 # Carregamos as fontes específicas do sistema que iremos utilizar na interface:
 sys_font = pygame.font.SysFont(Config.FONT_FAMILY, Config.FONT_SIZE)
@@ -39,9 +41,10 @@ medium_font = pygame.font.SysFont(Config.FONT_FAMILY, Config.FONT_SIZE+2)
 map_image = pygame.image.load(Config.map_path)
 map_image_scaled = pygame.transform.scale(map_image, Config.SCREEN_SIZE)
 
-#######################
-## CLASSES E FUNÇÕES ##
-#######################
+#####################
+# CLASSES E FUNÇÕES #
+#####################
+
 
 class Graph(dict):
     """ Representa um grafo.
@@ -50,7 +53,7 @@ class Graph(dict):
     ou seja, possui as mesmas funcionalidades de um 
     objeto do tipo dict().
     """
-    
+
     def create_from_csv(self, path):
         """ Lê um arquivo .csv e cria os vértices do grafo.
 
@@ -67,7 +70,7 @@ class Graph(dict):
         # Convertemos a tabela em uma matriz:
         data_matrix = data.values
         # Criamos um dicionário onde as chaves serão o nome dos municípios da primeira coluna
-        # e todas elas terão uma lista vazia como valor. Utilizamos listas do tipo set() 
+        # e todas elas terão uma lista vazia como valor. Utilizamos listas do tipo set()
         # pois elas possuem um acesso mais rápido e não aceitam objetos repetidos:
         for row in data_matrix:
             from_city = row[0]
@@ -86,7 +89,7 @@ class City:
     - pos : Posição do ponto do município no mapa.
     - rect : Retângulo de colisão do ponto do município.
     """
-    
+
     def __init__(self, name, pos):
         self._name = name
         self._pos = pos
@@ -154,7 +157,7 @@ class Edge:
 
 def get_city_byname(cities, name):
     """ Retorna o município cujo o nome foi especificado.
-    
+
     Retorna um objeto do tipo city ou None caso não seja encontrado.
 
     Parâmetros:
@@ -180,7 +183,7 @@ def get_edge(edge_list, origin, destiny):
     """
     for edge in edge_list:
         if edge.origin == origin and edge.destiny == destiny\
-            or edge.origin == destiny and edge.destiny == origin:
+                or edge.origin == destiny and edge.destiny == origin:
             return edge
     return None
 
@@ -198,65 +201,69 @@ def format_visited_list(origin, graph, vlist):
     return result
 
 
-#########################
-## MÉTODO DE AMPLITUDE ##
-#########################
+#######################
+# MÉTODO DE AMPLITUDE #
+#######################
 
 def bfs(graph, origin, goal):
-    """ Visita todos os vizinhos partindo do vértice origin até encontrar o vértice goal.
-    
-    Retorna uma tupla com os vértices visitados e o caminho mais curto em forma de lista.
+    """ Visita todos os vizinhos partindo do vértice origin até encontrar o
+    vértice goal.
+
+    Retorna uma tupla com os vértices visitados e o caminho mais curto em
+    forma de lista.
 
     Parâmetros:
     - origin : vértice inicial
     - goal : vértice objetivo
     """
-    queue = [(origin,[origin])]
+    queue = [(origin, [origin])]
     visited = OrderedSet()
     while queue:
         vertex, path = queue.pop(0)
         visited.add(vertex)
         for neighbour in graph[vertex]:
             if neighbour == goal:
-                #print(queue)
+                # print(queue)
                 return (visited, path + [goal])
             else:
                 if neighbour not in visited:
                     visited.add(neighbour)
                     queue.append((neighbour, path + [neighbour]))
-                    #print(queue)
+                    # print(queue)
 
-############################
-## MÉTODO DE PROFUNDIDADE ##
-############################
+##########################
+# MÉTODO DE PROFUNDIDADE #
+##########################
+
 
 def dfs(graph, origin, goal):
     """ Inicia no vértice origin, voltando até encontrar o vértice goal.
-    
+
     Retorna uma tupla com os vértices visitados e o caminho mais curto em forma de lista.
 
     Parâmetros:
     - origin : vértice inicial
     - goal : vértice objetivo
     """
-    stack = [(origin,[origin])]
+    stack = [(origin, [origin])]
     visited = OrderedSet()
     while stack:
         vertex, path = stack.pop()
         visited.add(vertex)
         for neighbour in graph[vertex]:
             if neighbour == goal:
-                #print(stack)
+                # print(stack)
                 return (visited, path + [goal])
             else:
                 if neighbour not in visited:
                     visited.add(neighbour)
                     stack.append((neighbour, path + [neighbour]))
-                    #print(stack)
+                    # print(stack)
 
-#################
-## FUNÇÃO MAIN ##
-#################
+###############
+# FUNÇÃO MAIN #
+###############
+
 
 if __name__ == "__main__":
 
@@ -293,7 +300,7 @@ if __name__ == "__main__":
             neighbour_object = get_city_byname(map_cities, neighbour)
             # Adicionamos o vizinho ao município de origem:
             city_object.add_neighbour(neighbour_object)
-    
+
     map_edges = set()   # Lista de arestas.
 
     # Para cada vértice do grafo pegamos o nome e a lista
@@ -307,23 +314,26 @@ if __name__ == "__main__":
                 city_object = get_city_byname(map_cities, city)
                 neighbour_object = get_city_byname(map_cities, neighbour)
                 # Criamos a aresta e a adicionamos na lista de arestas:
-                new_edge = Edge(origin=city, orig_pos=city_object.pos, destiny=neighbour, dest_pos=neighbour_object.pos)
+                new_edge = Edge(origin=city, orig_pos=city_object.pos,
+                                destiny=neighbour, dest_pos=neighbour_object.pos)
                 map_edges.add(new_edge)
 
     # Variáveis auxiliares:
     method_index = 0        # Índice do método de busca selecionado.
     found_path = None       # Caminho realizado pelo algoritmo.
-    visited_cities = None # Municípios visitados pelo algoritmo.
+    visited_cities = None  # Municípios visitados pelo algoritmo.
     from_city = None      # Município de origem.
     to_city = None        # Município de destino.
-    draw_edges = False      # Determina se as arestas serão mostradas na interface.
+    # Determina se as arestas serão mostradas na interface.
+    draw_edges = False
     exit_ui = False         # Determina se o programa irá encerrar.
-    
-    while not exit_ui:
-        pygame.event.pump() # Atualizamos os eventos do pygame.
 
-        mouse_pos = pygame.mouse.get_pos()  # Atualizamos a posição do ponteiro do mouse.
-        
+    while not exit_ui:
+        pygame.event.pump()  # Atualizamos os eventos do pygame.
+
+        # Atualizamos a posição do ponteiro do mouse.
+        mouse_pos = pygame.mouse.get_pos()
+
         # Atualizamos o retângulo de colisão do ponteiro do mouse:
         left, top = (mouse_pos[0], mouse_pos[1])    # Posicionamento.
         width, height = (Config.DOT_RADIUS, Config.DOT_RADIUS)  # Dimensões.
@@ -336,64 +346,88 @@ if __name__ == "__main__":
                 if event.key == pygame.K_ESCAPE:  # K_ESCAPE -> Tecla Esc.
                     exit_ui = True  # Finaliza o programa.
                 elif event.key == pygame.K_SPACE:   # K_SPACE -> Tecla Espaço.
-                    draw_edges = True if draw_edges is False else False # Alternamos entre mostrar ou não as arestas na interface.
+                    # Alternamos entre mostrar ou não as arestas na interface.
+                    draw_edges = True if draw_edges is False else False
                 elif event.key == pygame.K_LEFT:    # K_LEFT -> Seta esquerda.
-                    method_index = method_index - 1 if method_index > 0 else len(Config.METHOD_NAMES)-1 # Alterna entre os métodos de busca.
+                    # Alterna entre os métodos de busca.
+                    method_index = method_index - \
+                        1 if method_index > 0 else len(Config.METHOD_NAMES)-1
                 elif event.key == pygame.K_RIGHT:   # K_RIGHT -> Seta direita.
-                    method_index = method_index + 1 if method_index < len(Config.METHOD_NAMES)-1 else 0 # Alterna entre os métodos de busca.
+                    # Alterna entre os métodos de busca.
+                    method_index = method_index + \
+                        1 if method_index < len(Config.METHOD_NAMES)-1 else 0
             # Verificamos se algum botão do mouse foi pressionado:
             if event.type == pygame.MOUSEBUTTONUP:
                 for city in map_cities:
-                    # Verificamos se o retângulo do ponteiro colide com o retângulo de algum ponto no mapa:
+                    # Verificamos se o retângulo do ponteiro colide com o
+                    # retângulo de algum ponto no mapa:
                     if city.rect.colliderect(mouse_rect):
-                        # Os botões esquerdo e direito do mouse determinam, respectivamente, os municípios de origem e de destino:
+                        # Os botões esquerdo e direito do mouse determinam,
+                        # respectivamente, os municípios de origem e de
+                        # destino:
                         if event.button == MOUSE_LEFT:
                             from_city = city
                         elif event.button == MOUSE_RIGHT:
                             to_city = city
-                # Caso já tenhamos os municípios de origem e de destino selecionados, geramos a rota entre eles:
+                # Caso já tenhamos os municípios de origem e de destino
+                # selecionados, geramos a rota entre eles:
                 if (from_city and to_city) is not None:
                     result = None
-                    # Verificamos qual método de busca está selecionado e chamamos a função do mesmo:
+                    # Verificamos qual método de busca está selecionado e
+                    # chamamos a função do mesmo:
                     if (method_index == 0):
-                        result = bfs(graph, from_city.name, to_city.name)   # Resultado do algoritmo de amplitude.
+                        # Resultado do algoritmo de amplitude.
+                        result = bfs(graph, from_city.name, to_city.name)
                     else:
-                        result = dfs(graph, from_city.name, to_city.name)   # Resultado do algoritmo de profundidade.
-                    visited_cities = [city for city in result[0]]    # Municípios que foram visitados pelo algoritmo.
-                    found_path = result[1]       # Caminho mais curto da origem até o destino.
-                    
-                    # Imprimimos as informações no console:
-                    print('\n\n# Rota: {} ate {}.\n\nCaminho encontrado: {} passos -> {}.\n\nMunicípios visitados: {} -> {}'.format(from_city.name, to_city.name, len(found_path)-1, found_path, len(visited_cities), visited_cities))
+                        # Resultado do algoritmo de profundidade.
+                        result = dfs(graph, from_city.name, to_city.name)
+                    # Municípios que foram visitados pelo algoritmo.
+                    visited_cities = [city for city in result[0]]
+                    # Caminho mais curto da origem até o destino.
+                    found_path = result[1]
 
-        screen.fill(COLOR_WHITE)    # Preenchemos o fundo da tela com uma cor específica.
-        screen.blit(map_image_scaled, (0, 0))   # Desenhamos a imagem do mapa na tela.
+                    # Imprimimos as informações no console:
+                    info_text = '\n\n# Rota: {} ate {}.\n\nCaminho encontrado: {} passos -> {}.\n\nMunicípios visitados: {} -> {}'
+                    print(info_text.format(from_city.name, to_city.name, len(found_path)-1, found_path, len(visited_cities), visited_cities))
+
+        # Preenchemos o fundo da tela com uma cor específica.
+        screen.fill(COLOR_WHITE)
+        # Desenhamos a imagem do mapa na tela.
+        screen.blit(map_image_scaled, (0, 0))
 
         # Renderizamos as arestas por pares de vértices:
         for edge in map_edges:
             # Verificamos se a origem e o destino da aresta coincide com o caminho resultante:
-            is_path_edge = (found_path is not None) and (edge.origin in found_path and edge.destiny in found_path)
-            is_visited_edge = (found_path is not None) and (edge.origin in found_path and edge.destiny in visited_cities)
+            is_path_edge = (found_path is not None) and (
+                edge.origin in found_path and edge.destiny in found_path)
+            is_visited_edge = (found_path is not None) and (
+                edge.origin in found_path and edge.destiny in visited_cities)
             # Desenha as arestas que não fazem parte do caminho:
             if draw_edges is True:
-                pygame.draw.line(screen, COLOR_BLACK, edge.origin_pos, edge.destiny_pos, Config.LINE_WIDTH)
+                pygame.draw.line(screen, COLOR_BLACK, edge.origin_pos,
+                                 edge.destiny_pos, Config.LINE_WIDTH)
                 # Desenha as arestas que fazem parte dos visitados:
                 if is_visited_edge:
-                    pygame.draw.line(screen, COLOR_RED, edge.origin_pos, edge.destiny_pos, Config.LINE_WIDTH)
+                    pygame.draw.line(
+                        screen, COLOR_RED, edge.origin_pos, edge.destiny_pos, Config.LINE_WIDTH)
             # Desenha as arestas que fazem parte do caminho:
             if is_path_edge:
-                pygame.draw.line(screen, COLOR_GREEN, edge.origin_pos, edge.destiny_pos, Config.LINE_WIDTH)
+                pygame.draw.line(screen, COLOR_GREEN, edge.origin_pos,
+                                 edge.destiny_pos, Config.LINE_WIDTH)
 
         # Caso já tenhamos a rota:
         if found_path is not None:
             # Renderizamos um texto informativo acima do mapa:
-            info_text = 'De {} até {}. Passos: {}.'.format(from_city.name, to_city.name, len(found_path)-1)
+            info_text = 'De {} até {}. Passos: {}.'.format(
+                from_city.name, to_city.name, len(found_path)-1)
             # Criamos uma superfície renderizável:
             text_surface = title_font.render(info_text, True, COLOR_BLACK)
             # Adaptamos a posição do texto de acordo com o nome do município:
-            text_position = (Config.SCREEN_SIZE[0]/4 - 9 * len(from_city.name) + len(to_city.name), 0)
+            text_position = (
+                Config.SCREEN_SIZE[0]/4 - 9 * len(from_city.name) + len(to_city.name), 0)
             # Renderizamos a superfície do texto:
             screen.blit(text_surface, text_position)
-        
+
         # Desenhamos o texto do método selecionado:
         method_text = 'Método de busca: ' + Config.METHOD_NAMES[method_index]
         method_surface = title_font.render(method_text, True, COLOR_BLACK)
@@ -415,7 +449,8 @@ if __name__ == "__main__":
                 paint_color = COLOR_GREEN
 
             # Desenhamos o ponto e o nome dos municípios no mapa:
-            pygame.draw.circle(screen, paint_color, city.pos, Config.DOT_RADIUS)
+            pygame.draw.circle(screen, paint_color,
+                               city.pos, Config.DOT_RADIUS)
             name_text = medium_font.render(city.name, True, paint_color)
             screen.blit(name_text, (city.pos[0]-len(city.name)*3, city.pos[1]))
 
