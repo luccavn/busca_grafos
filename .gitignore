@@ -1,6 +1,7 @@
 # Editor configuration files #
 ##############################
 *.xml
+.vscode
 
 # Compiled source #
 ###################
