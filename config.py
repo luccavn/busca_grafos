@@ -12,7 +12,7 @@ FONT_FAMILY = 'Consolas'            # Nome da fonte.
 ARQ_MAPA = 'mapa_vale.png'          # Nome do arquivo do mapa.
 ARQ_DISTANCIAS = 'distancias.csv'   # Nome do arquivo de distâncias.
 ARQ_MUNICIPIOS = 'municipios.csv'   # Nome do arquivo de municípios.
-METHOD_NAMES = ['Amplitude', 'Profundidade']    # Nome dos métodos de busca.
+METHOD_NAMES = ['Amplitude', 'Profundidade', 'Profundidade Limitada']    # Nome dos métodos de busca.
 
 root_dir = path.dirname(path.abspath(__file__))                 # Diretório raiz do projeto.
 map_path = path.join(root_dir, 'res/' + ARQ_MAPA)               # Diretório da imagem do mapa.

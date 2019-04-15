@@ -190,19 +190,6 @@ def get_edge(edge_list, origin, destiny):
     return None
 
 
-def format_visited_list(origin, graph, vlist):
-    vertex = origin
-    result = dict()
-    result[vertex] = list()
-    for i in range(len(vlist)):
-        if vertex in graph[vlist[i]]:
-            result[vertex].append(vlist[i])
-        else:
-            result[vlist[i]] = list()
-            vertex = vlist[i]
-    return result
-
-
 #######################
 # MÉTODO DE AMPLITUDE #
 #######################
@@ -225,18 +212,16 @@ def bfs(graph, origin, goal):
         visited.add(vertex)
         for neighbour in graph[vertex]:
             if neighbour == goal:
-                # print(queue)
                 return (visited, path + [goal])
             else:
                 if neighbour not in visited:
                     visited.add(neighbour)
                     queue.append((neighbour, path + [neighbour]))
-                    # print(queue)
+
 
 ##########################
 # MÉTODO DE PROFUNDIDADE #
 ##########################
-
 
 def dfs(graph, origin, goal):
     """ Inicia no vértice origin, voltando até encontrar o vértice goal.
@@ -254,13 +239,46 @@ def dfs(graph, origin, goal):
         visited.add(vertex)
         for neighbour in graph[vertex]:
             if neighbour == goal:
-                # print(stack)
                 return (visited, path + [goal])
             else:
                 if neighbour not in visited:
                     visited.add(neighbour)
                     stack.append((neighbour, path + [neighbour]))
-                    # print(stack)
+
+
+###################################
+# MÉTODO DE PROFUNDIDADE LIMITADA #
+###################################
+
+def lim_dfs(graph, origin, goal, lim):
+    """ Inicia no vértice origin, voltando até encontrar o vértice goal.
+
+    Muda o sentido da busca caso alcançe o limite de passos estabelecido.
+    Retorna uma tupla com os vértices visitados e o caminho mais curto em forma de lista.
+
+    Parâmetros:
+    - origin : vértice inicial
+    - goal : vértice objetivo
+    - lim : limite de passos em um determinado sentido
+    """
+    stack = [(origin, [origin])]
+    visited = OrderedSet()
+    depth = 0
+    while stack:
+        if depth < lim:
+            vertex, path = stack.pop()
+            visited.add(vertex)
+            depth += 1
+            for neighbour in graph[vertex]:
+                if neighbour == goal:
+                    return (visited, path + [goal])
+                else:
+                    if neighbour not in visited:
+                        visited.add(neighbour)
+                        stack.append((neighbour, path + [neighbour]))
+        else:
+            return (visited, None)
+
 
 ###############
 # FUNÇÃO MAIN #
@@ -324,9 +342,9 @@ if __name__ == "__main__":
     visited_cities = None  # Municípios visitados pelo algoritmo.
     from_city = None      # Município de origem.
     to_city = None        # Município de destino.
-    # Determina se as arestas serão mostradas na interface.
-    draw_edges = False
+    draw_edges = False       # Determina se as arestas serão mostradas na interface.
     exit_ui = False         # Determina se o programa irá encerrar.
+    dfs_lim = 5             # Limite de passos do algoritmo de profundidade limitada.
 
     while not exit_ui:
         pygame.event.pump()  # Atualizamos os eventos do pygame.
@@ -373,20 +391,27 @@ if __name__ == "__main__":
                     result = None
                     # Verificamos qual método de busca está selecionado e
                     # chamamos a função do mesmo:
-                    if (method_index == 0):
-                        # Resultado do algoritmo de amplitude.
+                    if method_index == 0:
+                        # Resultado do algoritmo de amplitude:
                         result = bfs(graph, from_city.name, to_city.name)
-                    else:
-                        # Resultado do algoritmo de profundidade.
+                    elif method_index == 1:
+                        # Resultado do algoritmo de profundidade:
                         result = dfs(graph, from_city.name, to_city.name)
+                    else:
+                        # Resultado do algoritmo de profundidade limitada:
+                        result = lim_dfs(graph, from_city.name, to_city.name, dfs_lim)
                     # Municípios que foram visitados pelo algoritmo.
                     visited_cities = [city for city in result[0]]
                     # Caminho mais curto da origem até o destino.
                     found_path = result[1]
 
                     # Imprimimos as informações no console:
-                    info_text = '\n\n# Rota: {} ate {}.\n\nCaminho encontrado: {} passos -> {}.\n\nMunicípios visitados: {} -> {}'
-                    print(info_text.format(from_city.name, to_city.name, len(found_path)-1, found_path, len(visited_cities), visited_cities))
+                    if found_path is not None:
+                        info_text = '\n\n# Rota: {} ate {}.\n\nCaminho encontrado: {} passos -> {}.\n\nMunicípios visitados: {} -> {}'
+                        print(info_text.format(from_city.name, to_city.name, len(found_path)-1, found_path, len(visited_cities), visited_cities))
+                    else:
+                        info_text = '\n\n# Rota: {} ate {}.\n\nO objetivo nao foi encontrado dentro do limite estabelecido.\n\nMunicípios visitados: {} -> {}'
+                        print(info_text.format(from_city.name, to_city.name, len(visited_cities), visited_cities))
 
         # Preenchemos o fundo da tela com uma cor específica.
         screen.fill(COLOR_WHITE)
@@ -418,7 +443,7 @@ if __name__ == "__main__":
         if found_path is not None:
             # Renderizamos um texto informativo acima do mapa:
             info_text = 'De {} até {}. Passos: {}.'.format(
-                from_city.name, to_city.name, len(found_path)-1)
+                from_city.name, to_city.name, len(found_path)-1 if found_path is not None else len(visited_cities))
             # Criamos uma superfície renderizável:
             text_surface = title_font.render(info_text, True, COLOR_BLACK)
             # Adaptamos a posição do texto de acordo com o nome do município:
@@ -428,7 +453,7 @@ if __name__ == "__main__":
             screen.blit(text_surface, text_position)
 
         # Desenhamos o texto do método selecionado:
-        method_text = 'Método de busca: ' + Config.METHOD_NAMES[method_index]
+        method_text = 'Método de busca: ' + Config.METHOD_NAMES[method_index] + '. Limite de passos: ' + dfs_lim
         method_surface = title_font.render(method_text, True, COLOR_BLACK)
         method_position = (Config.SCREEN_SIZE[0]/4, Config.SCREEN_SIZE[1]-24)
         screen.blit(method_surface, method_position)
