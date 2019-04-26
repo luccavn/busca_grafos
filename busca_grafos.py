@@ -280,6 +280,43 @@ def lim_dfs(graph, origin, goal, lim):
             return (visited, None)
 
 
+###################################
+# MÉTODO DE PROFUNDIDADE INTERATIVA #
+###################################
+
+def interativa_dfs(graph, origin, goal, lim):
+    """ Inicia no vértice origin, voltando até encontrar o vértice goal.
+
+    Muda o sentido da busca caso alcançe o limite de passos estabelecido.
+    Retorna uma tupla com os vértices visitados e o caminho mais curto em forma de lista.
+
+    Parâmetros:
+    - origin : vértice inicial
+    - goal : vértice objetivo
+    - lim : limite de passos em um determinado sentido
+    """
+    stack = [(origin, [origin])]
+    visited = OrderedSet()
+    depth = 0
+    while stack:
+        if depth < lim:
+            vertex, path = stack.pop()
+            visited.add(vertex)
+            depth += 1
+            for neighbour in graph[vertex]:
+                if neighbour == goal:
+                    return (visited, path + [goal])
+                else:
+                    if neighbour not in visited:
+                        visited.add(neighbour)
+                        stack.append((neighbour, path + [neighbour]))
+        else:
+            if len(graph) > lim:
+                lim += 1
+                return interativa_dfs(graph, origin, goal, lim)
+            else:
+                return (visited, None)
+
 ###############
 # FUNÇÃO MAIN #
 ###############
@@ -397,9 +434,11 @@ if __name__ == "__main__":
                     elif method_index == 1:
                         # Resultado do algoritmo de profundidade:
                         result = dfs(graph, from_city.name, to_city.name)
-                    else:
+                    elif method_index == 2:
                         # Resultado do algoritmo de profundidade limitada:
                         result = lim_dfs(graph, from_city.name, to_city.name, dfs_lim)
+                    else:
+                        result = interativa_dfs(graph, from_city.name, to_city.name, dfs_lim)
                     # Municípios que foram visitados pelo algoritmo.
                     visited_cities = [city for city in result[0]]
                     # Caminho mais curto da origem até o destino.
