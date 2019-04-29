@@ -5,6 +5,7 @@ import pygame
 import pandas as pd
 from pygame.locals import Rect
 from lib.ordered_set import OrderedSet
+from collections import deque, defaultdict
 
 ##############
 # CONSTANTES #
@@ -49,7 +50,7 @@ class Graph(dict):
     """ Representa um grafo.
 
     Esta classe é uma implementação de um dicionário,
-    ou seja, possui as mesmas funcionalidades de um 
+    ou seja, possui as mesmas funcionalidades de um
     objeto do tipo dict().
     """
 
@@ -69,7 +70,7 @@ class Graph(dict):
         data = pd.read_csv(path, sep=',', encoding='utf-8')
         # Convertemos a tabela em uma matriz:
         data_matrix = data.values
-        # Criamos um dicionário onde as chaves serão o nome dos municípios da 
+        # Criamos um dicionário onde as chaves serão o nome dos municípios da
         # primeira coluna e todas elas terão uma lista vazia como valor.
         # Utilizamos listas do tipo set() pois elas possuem um acesso mais
         # rápido e não aceitam objetos repetidos:
@@ -226,7 +227,8 @@ def bfs(graph, origin, goal):
 def dfs(graph, origin, goal):
     """ Inicia no vértice origin, voltando até encontrar o vértice goal.
 
-    Retorna uma tupla com os vértices visitados e o caminho mais curto em forma de lista.
+    Retorna uma tupla com os vértices visitados e o caminho mais curto em
+    forma de lista.
 
     Parâmetros:
     - origin : vértice inicial
@@ -254,7 +256,8 @@ def lim_dfs(graph, origin, goal, lim):
     """ Inicia no vértice origin, voltando até encontrar o vértice goal.
 
     Muda o sentido da busca caso alcançe o limite de passos estabelecido.
-    Retorna uma tupla com os vértices visitados e o caminho mais curto em forma de lista.
+    Retorna uma tupla com os vértices visitados e o caminho mais curto em
+    forma de lista.
 
     Parâmetros:
     - origin : vértice inicial
@@ -280,15 +283,18 @@ def lim_dfs(graph, origin, goal, lim):
             return (visited, None)
 
 
-###################################
-# MÉTODO DE PROFUNDIDADE INTERATIVA #
-###################################
+####################################
+# MÉTODO DE PROFUNDIDADE ITERATIVA #
+####################################
 
-def interativa_dfs(graph, origin, goal, lim):
+def deepening_dfs(graph, origin, goal, lim):
     """ Inicia no vértice origin, voltando até encontrar o vértice goal.
 
     Muda o sentido da busca caso alcançe o limite de passos estabelecido.
-    Retorna uma tupla com os vértices visitados e o caminho mais curto em forma de lista.
+    Aumenta o limite de passos caso o objetivo não seja encontrado com o
+    limite estabelecido.
+    Retorna uma tupla com os vértices visitados e o caminho mais curto em
+    forma de lista.
 
     Parâmetros:
     - origin : vértice inicial
@@ -311,11 +317,11 @@ def interativa_dfs(graph, origin, goal, lim):
                         visited.add(neighbour)
                         stack.append((neighbour, path + [neighbour]))
         else:
-            if len(graph) > lim:
-                lim += 1
-                return interativa_dfs(graph, origin, goal, lim)
+            if lim < len(graph)-1:
+                return deepening_dfs(graph, origin, goal, lim+1)
             else:
                 return (visited, None)
+
 
 ###############
 # FUNÇÃO MAIN #
@@ -376,12 +382,12 @@ if __name__ == "__main__":
     # Variáveis auxiliares:
     method_index = 0        # Índice do método de busca selecionado.
     found_path = None       # Caminho realizado pelo algoritmo.
-    visited_cities = None  # Municípios visitados pelo algoritmo.
-    from_city = None      # Município de origem.
-    to_city = None        # Município de destino.
-    draw_edges = False       # Determina se as arestas serão mostradas na interface.
+    visited_cities = None   # Municípios visitados pelo algoritmo.
+    from_city = None        # Município de origem.
+    to_city = None          # Município de destino.
+    draw_edges = False      # Determina se as arestas serão desenhadas.
     exit_ui = False         # Determina se o programa irá encerrar.
-    dfs_lim = 5             # Limite de passos do algoritmo de profundidade limitada.
+    dfs_lim = 5             # Limite de passos dos algoritmos.
 
     while not exit_ui:
         pygame.event.pump()  # Atualizamos os eventos do pygame.
@@ -405,11 +411,11 @@ if __name__ == "__main__":
                     draw_edges = True if draw_edges is False else False
                 elif event.key == pygame.K_LEFT:
                     # Alterna entre os métodos de busca.
-                    method_index = method_index - \
-                        1 if method_index > 0 else len(Config.METHOD_NAMES)-1
+                    method_index = method_index-1 if method_index > 0 \
+                        else len(Config.METHOD_NAMES)-1
                 elif event.key == pygame.K_RIGHT:
-                    method_index = method_index + \
-                        1 if method_index < len(Config.METHOD_NAMES)-1 else 0
+                    method_index = method_index+1 if method_index < \
+                        len(Config.METHOD_NAMES)-1 else 0
             if event.type == pygame.MOUSEBUTTONUP:
                 for city in map_cities:
                     # Verificamos se o retângulo do ponteiro colide com o
@@ -436,9 +442,11 @@ if __name__ == "__main__":
                         result = dfs(graph, from_city.name, to_city.name)
                     elif method_index == 2:
                         # Resultado do algoritmo de profundidade limitada:
-                        result = lim_dfs(graph, from_city.name, to_city.name, dfs_lim)
+                        result = lim_dfs(graph, from_city.name,
+                                         to_city.name, dfs_lim)
                     else:
-                        result = interativa_dfs(graph, from_city.name, to_city.name, dfs_lim)
+                        result = deepening_dfs(
+                            graph, from_city.name, to_city.name, dfs_lim)
                     # Municípios que foram visitados pelo algoritmo.
                     visited_cities = [city for city in result[0]]
                     # Caminho mais curto da origem até o destino.
@@ -447,10 +455,12 @@ if __name__ == "__main__":
                     # Imprimimos as informações no console:
                     if found_path is not None:
                         info_text = '\n\n# Rota: {} ate {}.\n\nCaminho encontrado: {} passos -> {}.\n\nMunicípios visitados: {} -> {}'
-                        print(info_text.format(from_city.name, to_city.name, len(found_path)-1, found_path, len(visited_cities), visited_cities))
+                        print(info_text.format(from_city.name, to_city.name, len(
+                            found_path)-1, found_path, len(visited_cities), visited_cities))
                     else:
                         info_text = '\n\n# Rota: {} ate {}.\n\nO objetivo nao foi encontrado dentro do limite estabelecido.\n\nMunicípios visitados: {} -> {}'
-                        print(info_text.format(from_city.name, to_city.name, len(visited_cities), visited_cities))
+                        print(info_text.format(from_city.name, to_city.name, len(
+                            visited_cities), visited_cities))
 
         # Preenchemos o fundo da tela com uma cor específica.
         screen.fill(COLOR_WHITE)
@@ -492,7 +502,9 @@ if __name__ == "__main__":
             screen.blit(text_surface, text_position)
 
         # Desenhamos o texto do método selecionado:
-        method_text = 'Método de busca: ' + Config.METHOD_NAMES[method_index] + '. Limite de passos: ' + dfs_lim
+        method_text = 'Método de busca: ' + \
+            Config.METHOD_NAMES[method_index] + \
+            '. Limite de passos: %s' % dfs_lim
         method_surface = title_font.render(method_text, True, COLOR_BLACK)
         method_position = (Config.SCREEN_SIZE[0]/4, Config.SCREEN_SIZE[1]-24)
         screen.blit(method_surface, method_position)
