@@ -5,7 +5,7 @@ import pygame
 import pandas as pd
 from pygame.locals import Rect
 from lib.ordered_set import OrderedSet
-from collections import deque, defaultdict
+from collections import deque
 
 ##############
 # CONSTANTES #
@@ -281,6 +281,7 @@ def lim_dfs(graph, origin, goal, lim):
                         stack.append((neighbour, path + [neighbour]))
         else:
             return (visited, None)
+    return (visited, None)
 
 
 ####################################
@@ -321,12 +322,56 @@ def deepening_dfs(graph, origin, goal, lim):
                 return deepening_dfs(graph, origin, goal, lim+1)
             else:
                 return (visited, None)
+    return (visited, None)
+
+
+#####################################
+# MÉTODO DE AMPLITUDE BI-DIRECIONAL #
+#####################################
+
+def bidir_bfs(graph, origin, goal):
+    if origin == goal:
+        return [origin]
+
+    path_dict = {origin: [origin], goal: [goal]} # Dicionário para guardar o caminho.
+    visited = set()
+
+    while len(path_dict) > 0:
+        active_vertices = list(path_dict.keys()) # Cópia do dicionário.
+        for vertex in active_vertices:
+            path = path_dict[vertex] # Caminho atual.
+            origin = path[0]
+            current_neighbours = set(graph[vertex]) - visited # Vizinhos disponíveis.
+            # Verificamos se houve alguma intersecção entre os caminhos:
+            if len(current_neighbours.intersection(active_vertices)) > 0:
+                for meeting_vertex in current_neighbours.intersection(active_vertices):
+                    # Verificamos se os caminhos possuem origens distintas,
+                    # se sim então temos um resultado:
+                    if origin != path_dict[meeting_vertex][0]:
+                        # Invertemos a ordem de um dos caminhos:
+                        path_dict[meeting_vertex].reverse()
+                        # Retornamos a soma dos caminhos:
+                        return (visited, path_dict[vertex] + path_dict[meeting_vertex])
+
+            # Continuamos com a busca:
+            if len(set(current_neighbours) - visited - set(active_vertices)) == 0:
+                # Caso não exista mais vizinhos, removemos o caminho da lista:
+                path_dict.pop(vertex, None)
+                visited.add(vertex)
+            else:
+                # Caso contrário buscamos por novos vizinhos:
+                for neighbour_vertex in current_neighbours - visited - set(active_vertices):
+                    path_dict[neighbour_vertex] = path + [neighbour_vertex]
+                    active_vertices.append(neighbour_vertex)
+                path_dict.pop(vertex, None)
+                visited.add(vertex)
+
+    return None
 
 
 ###############
 # FUNÇÃO MAIN #
 ###############
-
 
 if __name__ == "__main__":
 
@@ -387,7 +432,7 @@ if __name__ == "__main__":
     to_city = None          # Município de destino.
     draw_edges = False      # Determina se as arestas serão desenhadas.
     exit_ui = False         # Determina se o programa irá encerrar.
-    dfs_lim = 5             # Limite de passos dos algoritmos.
+    dfs_lim = 16             # Limite de passos dos algoritmos.
 
     while not exit_ui:
         pygame.event.pump()  # Atualizamos os eventos do pygame.
@@ -444,9 +489,11 @@ if __name__ == "__main__":
                         # Resultado do algoritmo de profundidade limitada:
                         result = lim_dfs(graph, from_city.name,
                                          to_city.name, dfs_lim)
-                    else:
+                    elif method_index == 3:
                         result = deepening_dfs(
                             graph, from_city.name, to_city.name, dfs_lim)
+                    else:
+                        result = bidir_bfs(graph, from_city.name, to_city.name)
                     # Municípios que foram visitados pelo algoritmo.
                     visited_cities = [city for city in result[0]]
                     # Caminho mais curto da origem até o destino.
