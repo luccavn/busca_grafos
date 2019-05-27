@@ -76,12 +76,12 @@ class Graph(dict):
         # rápido e não aceitam objetos repetidos:
         for row in data_matrix:
             from_city = row[0]
-            self[from_city] = set()
+            self[from_city] = list()
         # Agora adicionamos os vizinhos desses municípios, que são os
         # municípios da segunda coluna. Note que por enquanto não estamos
         # utilizando a coluna de distâncias:
         for from_city, to_city, distance in data_matrix:
-            self[from_city].add(to_city)
+            self[from_city].append([to_city, distance])
 
 
 class City:
@@ -212,12 +212,12 @@ def bfs(graph, origin, goal):
         vertex, path = queue.pop(0)
         visited.add(vertex)
         for neighbour in graph[vertex]:
-            if neighbour == goal:
+            if neighbour[0] == goal:
                 return (visited, path + [goal])
             else:
-                if neighbour not in visited:
-                    visited.add(neighbour)
-                    queue.append((neighbour, path + [neighbour]))
+                if neighbour[0] not in visited:
+                    visited.add(neighbour[0])
+                    queue.append((neighbour[0], path + [neighbour[0]]))
 
 
 ##########################
@@ -240,12 +240,12 @@ def dfs(graph, origin, goal):
         vertex, path = stack.pop()
         visited.add(vertex)
         for neighbour in graph[vertex]:
-            if neighbour == goal:
+            if neighbour[0] == goal:
                 return (visited, path + [goal])
             else:
-                if neighbour not in visited:
-                    visited.add(neighbour)
-                    stack.append((neighbour, path + [neighbour]))
+                if neighbour[0] not in visited:
+                    visited.add(neighbour[0])
+                    stack.append((neighbour[0], path + [neighbour[0]]))
 
 
 ###################################
@@ -273,12 +273,12 @@ def lim_dfs(graph, origin, goal, lim):
             visited.add(vertex)
             depth += 1
             for neighbour in graph[vertex]:
-                if neighbour == goal:
+                if neighbour[0] == goal:
                     return (visited, path + [goal])
                 else:
-                    if neighbour not in visited:
-                        visited.add(neighbour)
-                        stack.append((neighbour, path + [neighbour]))
+                    if neighbour[0] not in visited:
+                        visited.add(neighbour[0])
+                        stack.append((neighbour[0], path + [neighbour[0]]))
         else:
             return (visited, None)
     return (visited, None)
@@ -311,12 +311,12 @@ def deepening_dfs(graph, origin, goal, lim):
             visited.add(vertex)
             depth += 1
             for neighbour in graph[vertex]:
-                if neighbour == goal:
+                if neighbour[0] == goal:
                     return (visited, path + [goal])
                 else:
-                    if neighbour not in visited:
-                        visited.add(neighbour)
-                        stack.append((neighbour, path + [neighbour]))
+                    if neighbour[0] not in visited:
+                        visited.add(neighbour[0])
+                        stack.append((neighbour[0], path + [neighbour[0]]))
         else:
             if lim < len(graph)-1:
                 return deepening_dfs(graph, origin, goal, lim+1)
@@ -341,7 +341,7 @@ def bidir_bfs(graph, origin, goal):
         for vertex in active_vertices:
             path = path_dict[vertex] # Caminho atual.
             origin = path[0]
-            current_neighbours = set(graph[vertex]) - visited # Vizinhos disponíveis.
+            current_neighbours = set([n[0] for n in graph[vertex]]) - visited # Vizinhos disponíveis.
             # Verificamos se houve alguma intersecção entre os caminhos:
             if len(current_neighbours.intersection(active_vertices)) > 0:
                 for meeting_vertex in current_neighbours.intersection(active_vertices):
@@ -404,7 +404,7 @@ if __name__ == "__main__":
     for city, neighbours in graph.items():
         for neighbour in neighbours:
             city_object = get_city_byname(map_cities, city)
-            neighbour_object = get_city_byname(map_cities, neighbour)
+            neighbour_object = get_city_byname(map_cities, neighbour[0])
             # Adicionamos o vizinho ao município de origem:
             city_object.add_neighbour(neighbour_object)
 
@@ -416,12 +416,12 @@ if __name__ == "__main__":
     for city, neighbours in graph.items():
         for neighbour in neighbours:
             # Verificamos se a aresta desses municípios já existe:
-            if get_edge(map_edges, city, neighbour) is None:
+            if get_edge(map_edges, city, neighbour[0]) is None:
                 city_object = get_city_byname(map_cities, city)
-                neighbour_object = get_city_byname(map_cities, neighbour)
+                neighbour_object = get_city_byname(map_cities, neighbour[0])
                 # Criamos a aresta e a adicionamos na lista de arestas:
                 new_edge = Edge(origin=city, orig_pos=city_object.pos,
-                                destiny=neighbour, dest_pos=neighbour_object.pos)
+                                destiny=neighbour[0], dest_pos=neighbour_object.pos)
                 map_edges.add(new_edge)
 
     # Variáveis auxiliares:
