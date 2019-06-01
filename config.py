@@ -17,7 +17,8 @@ METHOD_NAMES = ['Amplitude',
                 'Profundidade',
                 'Profundidade Limitada',
                 'Profundidade Interativa',
-                'Bi-direcional']
+                'Bi-direcional',
+                'Custo Uniforme']
 
 # Diretório raiz do projeto:
 root_dir = path.dirname(path.abspath(__file__))

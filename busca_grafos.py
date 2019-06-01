@@ -3,6 +3,7 @@
 
 import pygame
 import pandas as pd
+import queue as Q
 from pygame.locals import Rect
 from lib.ordered_set import OrderedSet
 from collections import deque
@@ -365,8 +366,28 @@ def bidir_bfs(graph, origin, goal):
                     active_vertices.append(neighbour_vertex)
                 path_dict.pop(vertex, None)
                 visited.add(vertex)
-
     return None
+
+
+############################
+# MÉTODO DE CUSTO UNIFORME #
+############################
+
+def uniform_cost_search(graph, origin, goal):
+    queue = Q.PriorityQueue()
+    queue.put((0, [origin]))
+    while not queue.empty():
+        node = queue.get()
+        current = node[1][len(node[1]) - 1]
+        if goal in node[1]:
+            return ([node[0]], node[1])
+            break
+        cost = node[0]
+        for neighbor in graph[current]:
+            temp = node[1][:]
+            temp.append(neighbor[0])
+            queue.put((cost + neighbour[1], temp))
+    return ([], None)
 
 
 ###############
@@ -492,8 +513,10 @@ if __name__ == "__main__":
                     elif method_index == 3:
                         result = deepening_dfs(
                             graph, from_city.name, to_city.name, dfs_lim)
-                    else:
+                    elif method_index == 4:
                         result = bidir_bfs(graph, from_city.name, to_city.name)
+                    else:
+                        result = uniform_cost_search(graph, from_city.name, to_city.name)
                     # Municípios que foram visitados pelo algoritmo.
                     visited_cities = [city for city in result[0]]
                     # Caminho mais curto da origem até o destino.
