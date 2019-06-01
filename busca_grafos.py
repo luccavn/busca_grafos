@@ -453,7 +453,7 @@ if __name__ == "__main__":
     to_city = None          # Município de destino.
     draw_edges = False      # Determina se as arestas serão desenhadas.
     exit_ui = False         # Determina se o programa irá encerrar.
-    dfs_lim = 16             # Limite de passos dos algoritmos.
+    dfs_lim = 7             # Limite de passos dos algoritmos que possuem limite.
 
     while not exit_ui:
         pygame.event.pump()  # Atualizamos os eventos do pygame.
@@ -482,6 +482,10 @@ if __name__ == "__main__":
                 elif event.key == pygame.K_RIGHT:
                     method_index = method_index+1 if method_index < \
                         len(Config.METHOD_NAMES)-1 else 0
+                elif event.key == pygame.K_UP:
+                    dfs_lim += 1
+                elif event.key == pygame.K_DOWN:
+                    dfs_lim -= 1 if dfs_lim > 0 else 0
             if event.type == pygame.MOUSEBUTTONUP:
                 for city in map_cities:
                     # Verificamos se o retângulo do ponteiro colide com o
