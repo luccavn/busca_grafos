@@ -1,4 +1,6 @@
 # busca_grafos
+Search algorithms applied in a graph that represents the counties of a specific region in the state of São Paulo named "Vale do Paraíba".
+
 Algoritmos de busca aplicados em um grafo que representa os municípios do Vale do Paraíba através de um mapa.
 
 # Métodos de Busca:
