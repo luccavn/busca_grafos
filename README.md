@@ -20,3 +20,15 @@ Algoritmos de busca aplicados em um grafo que representa os municípios do Vale 
 * DFS;
 * Limited DFS;
 * Iteractive DFS.
+
+# Imagens:
+
+![Amostra 1](amostras/amostra01.png)
+
+![Amostra 2](amostras/amostra02.png)
+
+![Amostra 3](amostras/amostra03.png)
+
+![Amostra 4](amostras/amostra04.png)
+
+![Amostra 5](amostras/amostra05.png)
